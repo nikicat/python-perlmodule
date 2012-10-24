@@ -913,7 +913,7 @@ type(self)
     case 1:    RETVAL = self->type;      break;
     case 2:    RETVAL = self->value;     break;
     case 3:    RETVAL = self->traceback; break;
-    default: croak("Unknown attribute (%d)", ix);
+    default: croak("Unknown attribute (%d)", (int)ix);
         }
         ENTER_PYTHON;
         Py_XINCREF(RETVAL);
@@ -1055,7 +1055,7 @@ Exception(...)
 #endif
     case 27: e = PyExc_ValueError; break;
     case 28: e = PyExc_ZeroDivisionError; break;
-    default: croak("Bad exception selector (%d)", ix); break;
+    default: croak("Bad exception selector (%d)", (int)ix); break;
     }
     if (items) {
             SV* argsv = ST(0);

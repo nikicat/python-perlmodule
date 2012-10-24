@@ -107,11 +107,7 @@ pysvrv_dealloc(PySVRV *self)
 #endif
 
     ENTER_PYTHON;
-#if PY_MAJOR_VERSION >= 1 && PY_MINOR_VERSION >= 6
     PyObject_DEL(self);
-#else
-    PyMem_DEL(self);
-#endif
     ASSERT_LOCK_PYTHON;
 }
 
@@ -1178,7 +1174,7 @@ pysvrv_getattr(PySVRV *self, char *name)
 	}
     }
     else if (strcmp(name, "__type__") == 0) {
-	char *tmp;
+	const char *tmp;
 	ENTER_PERL;
 	tmp = sv_reftype(SvRV(self->rv), 0);
 	ENTER_PYTHON;
@@ -1412,11 +1408,11 @@ type_error(char *msg, SV* sv)
 }
 
 
-static int
+static Py_ssize_t
 pysvrv_length(PySVRV *self)
 {
     SV* sv;
-    int len;
+    Py_ssize_t len;
     dCTX;
 
     ASSERT_LOCK_PYTHON;
@@ -1471,7 +1467,7 @@ pysvrv_nonzero(PySVRV *self)
 
 
 static PyObject *
-pysvrv_item(PySVRV *self, int index)
+pysvrv_item(PySVRV *self, Py_ssize_t index)
 {
     SV* sv;
     PyObject *item;
@@ -1766,7 +1762,7 @@ DONE:
 
 
 static PyObject *
-pysvrv_repeat(PySVRV *self, int n)
+pysvrv_repeat(PySVRV *self, Py_ssize_t n)
 {
     SV* sv;
     PyObject *pyo_res;
@@ -1833,7 +1829,7 @@ pysvrv_repeat(PySVRV *self, int n)
 
 
 static PyObject *
-pysvrv_slice(PySVRV *self, int ilow, int ihigh)
+pysvrv_slice(PySVRV *self, Py_ssize_t ilow, Py_ssize_t ihigh)
 {
     SV* sv;
     PyObject *pyo_res;
@@ -1899,7 +1895,7 @@ pysvrv_slice(PySVRV *self, int ilow, int ihigh)
 }
 
 static int
-pysvrv_ass_slice(PySVRV *self, int ilow, int ihigh, PyObject *v)
+pysvrv_ass_slice(PySVRV *self, Py_ssize_t ilow, Py_ssize_t ihigh, PyObject *v)
 {
     SV* sv;
     int status;  /* return value */
@@ -2001,22 +1997,20 @@ static PyNumberMethods pysvrv_as_number = {
 };
 
 static PyMappingMethods pysvrv_as_mapping = {
-    (inquiry)pysvrv_length, /* mp_length */
+    (lenfunc)pysvrv_length, /* mp_length */
     (binaryfunc)pysvrv_subscript, /* mp_subscript */
     (objobjargproc)pysvrv_ass_sub, /* mp_ass_subscript */
 };
 
 static PySequenceMethods pysvrv_as_sequence = {
-    (inquiry)pysvrv_length, /*sq_length*/
+    (lenfunc)pysvrv_length, /*sq_length*/
     (binaryfunc)pysvrv_concat, /*sq_concat*/
-    (intargfunc)pysvrv_repeat, /*sq_repeat*/
-    (intargfunc)pysvrv_item, /*sq_item*/
-    (intintargfunc)pysvrv_slice, /*sq_slice*/
+    (ssizeargfunc)pysvrv_repeat, /*sq_repeat*/
+    (ssizeargfunc)pysvrv_item, /*sq_item*/
+    (ssizessizeargfunc)pysvrv_slice, /*sq_slice*/
     0, /*sq_ass_item*/
-    (intintobjargproc)pysvrv_ass_slice, /*sq_ass_slice*/
-#if PY_MAJOR_VERSION >= 1 && PY_MINOR_VERSION >= 6
+    (ssizessizeobjargproc)pysvrv_ass_slice, /*sq_ass_slice*/
     0, /*sq_contains*/
-#endif
 };
 
 

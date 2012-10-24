@@ -182,7 +182,7 @@ call_perl(char *method, SV* obj, I32 gimme,
 
     /* push keyword arguments too if there are any */
     if (keywds) {
-    int pos = 0;
+    Py_ssize_t pos = 0;
     PyObject *key;
     char *key_str;
     PyObject *val;

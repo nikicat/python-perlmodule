@@ -29,7 +29,7 @@ print "ok 5"
 try:
     print h.get(42)
 except TypeError, v:
-    if str(v) != "get() argument 1 must be string or read-only buffer, not int":
+    if str(v) != "must be string or read-only buffer, not int":
         print "not ",
     print "ok 6"
 

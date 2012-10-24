@@ -70,7 +70,7 @@ sub foo {
    eval {
        $foo->plain_list("foo", "bar");
    };
-   print "not " unless $@ && $@ =~ /^python\.exceptions\.TypeError: 'list' object is not callable/;
+   print "not " unless $@ && $@ =~ /^python\.<type 'exceptions\.TypeError'>: 'list' object is not callable/;
    print "ok 13\n";
 
    # Strings are a sequences too, but they are not unwrapped.

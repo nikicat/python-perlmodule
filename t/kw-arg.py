@@ -19,7 +19,7 @@ sub foo {
         $o->foo();
     };
     #print $@;
-    print "not " unless "$@" =~ /^python.exceptions.TypeError: foo\(\) takes at least 2 arguments \(1 given\)/;
+    print "not " unless "$@" =~ /^python.<type 'exceptions.TypeError'>: foo\(\) takes at least 2 arguments \(1 given\)/;
     print "ok 1\n";
 
     my $res;
