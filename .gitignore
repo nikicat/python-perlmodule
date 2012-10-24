@@ -1,0 +1,11 @@
+Python-Object/MYMETA.yml
+Python-Object/Makefile
+Python-Object/Object.bs
+Python-Object/Object.c
+Python-Object/Object.o
+Python-Object/blib/
+Python-Object/pm_to_blib
+build/
+perlxsi.c
+try_perlapi.c
+try_perlapi.h
