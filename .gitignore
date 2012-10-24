@@ -9,3 +9,4 @@ build/
 perlxsi.c
 try_perlapi.c
 try_perlapi.h
+*.pyc
