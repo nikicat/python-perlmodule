@@ -30,11 +30,13 @@ pyo2sv(PyObject *o)
     if (o == Py_None) {
 	return newSV(0);
     }
-    else if (PyString_Check(o)) {
-	return newSVpvn(PyString_AS_STRING(o), PyString_GET_SIZE(o));
+    else if (PyUnicode_Check(o)) {
+		Py_ssize_t size;
+		char* str = PyUnicode_AsUTF8AndSize(o, &size);
+		return newSVpvn(str, size);
     }
-    else if (PyInt_Check(o)) {
-	return newSViv(PyInt_AsLong(o));
+    else if (PyLong_Check(o)) {
+	return newSViv(PyLong_AsLong(o));
     }
     else if (PyLong_Check(o)) {
 	unsigned long tmp = PyLong_AsUnsignedLong(o);

@@ -9,7 +9,7 @@ ok_re     = re.compile(r"^(not\s+)?ok\s+(\d+)$")
 
 def test_ok(f):
     expect_next = None
-    print f, "",
+    print(f, "", end=' ')
     for i in range(20 - len(f)):
         sys.stdout.write(".")
 
@@ -26,7 +26,7 @@ def test_ok(f):
         if res:
             expect_max  = int(res.group(1))
             if expect_max == 0:
-                print " skipped"
+                print(" skipped")
                 p.close()
                 return 1
             expect_next = 1
@@ -48,8 +48,8 @@ def test_ok(f):
     if ok and (expect_next - 1) != expect_max:
         ok = 0
 
-    if (ok): print " ok"
-    else:    print " failed"
+    if (ok): print(" ok")
+    else:    print(" failed")
     return ok
 
 os.chdir("t")
@@ -63,8 +63,8 @@ for f in files:
         if not test_ok(f):
             num_failed = num_failed + 1
 
-print
+print()
 if num_failed:
-    print num_failed, "TESTS FAILED" + ("!" * num_failed)
+    print(num_failed, "TESTS FAILED" + ("!" * num_failed))
 else:
-    print "All tests passed."
+    print("All tests passed.")

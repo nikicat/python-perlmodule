@@ -125,8 +125,8 @@ call_perl(char *method, SV* obj, I32 gimme,
         }
         m_obj = PyTuple_GetItem(args, 0);
         m_obj = PyObject_Str(m_obj); /* need decrement refcount after call */
-        assert(PyString_Check(m_obj));
-        method = PyString_AsString(m_obj);
+        assert(PyUnicode_Check(m_obj));
+        method = PyUnicode_AsUTF8(m_obj);
         argfirst = 1;
     }
     else if (!obj && !arglen) {
@@ -187,8 +187,8 @@ call_perl(char *method, SV* obj, I32 gimme,
     char *key_str;
     PyObject *val;
     while (PyDict_Next(keywds, &pos, &key, &val)) {
-        assert(PyString_Check(key));
-        key_str = PyString_AsString(key);
+        assert(PyUnicode_Check(key));
+        key_str = PyUnicode_AsUTF8(key);
       
         if (key_str[0] == '_' && key_str[1] == '_')
         continue;
@@ -738,8 +738,35 @@ static PyMethodDef PerlMethods[] = {
     { NULL, NULL } /* Sentinel */
 };
 
+struct module_state {
+        PyObject *error;
+};
 
-void
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+
+static int perl_traverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->error);
+    return 0;
+}
+
+static int perl_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+    return 0;
+}
+
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "perl",
+        NULL,
+        sizeof(struct module_state),
+        PerlMethods,
+        NULL,
+        perl_traverse,
+        perl_clear,
+        NULL
+};
+
+PyObject*
 #ifdef DL_HACK
 initperl2()
 #else
@@ -772,13 +799,14 @@ initperl()
      * python itself was embedded before we imported perl.
      */
 
-    m = Py_InitModule("perl", PerlMethods);
+    m = PyModule_Create(&moduledef);
     d = PyModule_GetDict(m);
     PerlError = PyErr_NewException("perl.PerlError", NULL, NULL);
     PyDict_SetItemString(d, "PerlError", PerlError);
 #ifdef MULTI_PERL
-    PyDict_SetItemString(d, "MULTI_PERL", PyInt_FromLong(1));
+    PyDict_SetItemString(d, "MULTI_PERL", PyLong_FromLong(1));
 #else
-    PyDict_SetItemString(d, "MULTI_PERL", PyInt_FromLong(0));
+    PyDict_SetItemString(d, "MULTI_PERL", PyLong_FromLong(0));
 #endif
+    return m;
 }

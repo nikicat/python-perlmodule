@@ -4,13 +4,12 @@ from distutils.core import setup, Extension
 from distutils.command.install import install
 from distutils.command.build import build
 
-DEBUG = 0
+DEBUG = 1
 perl = 'perl'
 
 import os
 import sys
 import subprocess
-from string  import split
 
 MULTI_PERL = os.path.isfile("MULTI_PERL")
 BOOT_FROM_PERL = os.path.isfile("BOOT_FROM_PERL")
@@ -25,18 +24,9 @@ include_dirs = []
 macros       = []
 cc_extra     = []
 
-for x in split(perl_ccopts):
+for x in perl_ccopts.split():
     if x[:2] == '-I':
         include_dirs.append(x[2:])
-
-    # XXX This is disabled since distutils does not yet implement
-    # define_macros.  Aarghhh!!  So much time wasted on debugging
-    # because of this.
-    elif 0 and x[:2] == '-D':
-        m = split(x[2:], '=', 2)
-        if len(m) == 1:
-            m.append(None)
-        macros.append(tuple(m))
     else:
         cc_extra.append(x)
 
@@ -54,7 +44,7 @@ if sys.platform[:3] == "win":
     import shutil
     svrv_object_c_name = "svrv_object.cpp"
     if os.path.exists(svrv_object_c_name):
-        os.chmod(svrv_object_c_name, 0777)
+        os.chmod(svrv_object_c_name, 0o777)
         os.unlink(svrv_object_c_name)
     shutil.copy("svrv_object.c", svrv_object_c_name)
 
@@ -69,7 +59,7 @@ sources = ['perlmodule.c',
 if BOOT_FROM_PERL:
     cc_extra.append("-DBOOT_FROM_PERL")
 else:
-    for x in split(perl_ldopts):
+    for x in perl_ldopts.split():
         if x[:2] == '-L':
             lib_dirs.append(x[2:])
         elif x[:2] == '-l' and sys.platform != 'win32':
@@ -95,7 +85,7 @@ else:
         cc_extra.append("-DDL_HACK")
         extra_ext.append(Extension(name = "perl",
                                    sources = ["dlhack.c"],
-				   libraries= ["dl"],
+                                   libraries= ["dl"],
                                    ))
 
 
@@ -122,13 +112,13 @@ if sys.platform == 'win32':
     sym_extra.append('vtbl_free_pyo')
 
 if DEBUG:
-    print "Macros:", macros
-    print "Include: ", include_dirs
-    print "Extra CC: ", cc_extra
-    print "Obj: ", o_extra
-    print "Libs:", libs
-    print "Lib dirs:",  lib_dirs
-    print "Extra LD: ", ld_extra
+    print(("Macros:", macros))
+    print(("Include: ", include_dirs))
+    print(("Extra CC: ", cc_extra))
+    print(("Obj: ", o_extra))
+    print(("Libs:", libs))
+    print(("Lib dirs:",  lib_dirs))
+    print(("Extra LD: ", ld_extra))
 
 ext_modules = []
 ext_modules.append(Extension(name = ext_name,
@@ -146,20 +136,20 @@ ext_modules.extend(extra_ext)
 
 class build_perl(build):
     def run(self):
-	os.chdir('Python-Object')
-	build.spawn(self, ['perl','Makefile.PL', 'INSTALLDIRS=vendor'], 'Python-Object')
-	build.spawn(self, ['make'])
-	os.chdir('..')
-	build.run(self)
+        os.chdir('Python-Object')
+        build.spawn(self, ['perl','Makefile.PL', 'INSTALLDIRS=vendor'], 'Python-Object')
+        build.spawn(self, ['make'])
+        os.chdir('..')
+        build.run(self)
 
 class test(build):
     def run(self):
-	cwd=os.getcwd()
-	ldpath = '%s/Python-Object/blib/arch/auto/Python/Object' % cwd
-	perllib = '%s/Python-Object/blib/lib' % cwd
-	pypath = '%s/%s' % (cwd, self.build_lib)
-	os.system('LD_LIBRARY_PATH="%s" PERL5LIB="%s" PYTHONPATH="%s" python test.py' % (ldpath, perllib, pypath))
-	build.run(self)
+        cwd=os.getcwd()
+        ldpath = '%s/Python-Object/blib/arch/auto/Python/Object' % cwd
+        perllib = '%s/Python-Object/blib/lib' % cwd
+        pypath = '%s/%s' % (cwd, self.build_lib)
+        os.system('LD_LIBRARY_PATH="%s" PERL5LIB="%s" PYTHONPATH="%s" python test.py' % (ldpath, perllib, pypath))
+        build.run(self)
 
 class my_install(install):
 

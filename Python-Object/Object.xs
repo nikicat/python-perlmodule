@@ -546,9 +546,10 @@ PyObject_Str(o,...)
      ENTER_PYTHON;
      str_o = (ix == 1) ? PyObject_Str(o) : PyObject_Repr(o);
      PERL_LOCK;
-     if (str_o && PyString_Check(str_o)) {
-    RETVAL = newSVpvn(PyString_AsString(str_o),
-              PyString_Size(str_o));    
+     if (str_o && PyUnicode_Check(str_o)) {
+         Py_ssize_t size;
+         char* str = PyUnicode_AsUTF8AndSize(str_o, &size);
+         RETVAL = newSVpvn(str, size);    
      }
      else {
     RETVAL = newSV(0);
@@ -764,7 +765,7 @@ PyEval_CallObjectWithKeywords(o,...)
                         val_sv = hv_iterval(hv, entry);
 
                         ENTER_PYTHON;
-                        key = PyString_FromStringAndSize(kstr, klen);
+                        key = PyUnicode_FromStringAndSize(kstr, klen);
                         if (key == NULL)
                             goto done;
 
@@ -934,9 +935,9 @@ as_string(self,...)
     str = PyObject_Str(self->type);
         PERL_LOCK;
     RETVAL = newSVpv("", 0);
-        if (str && PyString_Check(str)) {
+        if (str && PyUnicode_Check(str)) {
         sv_catpv(RETVAL, "python.");
-            sv_catpv(RETVAL, PyString_AsString(str));
+            sv_catpv(RETVAL, PyUnicode_AsUTF8(str));
         }
         else
             sv_catpv(RETVAL, "python");
@@ -946,11 +947,11 @@ as_string(self,...)
 
         if (self->value &&
             (str = PyObject_Str(self->value)) &&
-            PyString_Check(str))
+            PyUnicode_Check(str))
         {
         PERL_LOCK;
             sv_catpv(RETVAL, ": ");
-            sv_catpv(RETVAL, PyString_AsString(str));
+            sv_catpv(RETVAL, PyUnicode_AsUTF8(str));
             PERL_UNLOCK;
         }
         Py_XDECREF(str);
@@ -1026,7 +1027,7 @@ Exception(...)
         croak("Usage: Python::Err:Exception( [ OBJ ] )");
     switch (ix) {
     case  1: e = PyExc_Exception; break;
-    case  2: e = PyExc_StandardError; break;
+    case  2: e = PyExc_Exception; break;
     case  3: e = PyExc_ArithmeticError; break;
     case  4: e = PyExc_LookupError; break;
     case  5: e = PyExc_AssertionError; break;
