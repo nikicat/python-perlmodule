@@ -3,9 +3,11 @@
  * svrv_objects encapsulate a perl SvRV().
  */
 
+#include <Python.h>
 #include <EXTERN.h>
 #include <perl.h>
-#include <Python.h>
+
+#include "2to3.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -168,7 +170,7 @@ do_hash_kv(HV* hv, bool do_keys, bool do_values)
 	    I32 klen;
 	    char *kstr = hv_iterkey(entry, &klen);
 	    ENTER_PYTHON;
-	    k = PyUnicode_FromStringAndSize(kstr, klen);
+	    k = PyString_FromStringAndSize(kstr, klen);
 	    if (k == NULL)
 		goto FAIL;
 	    ENTER_PERL;
@@ -1140,7 +1142,7 @@ pysvrv_getattr(PySVRV *self, char *name)
     }
     else if (strcmp(name, "__methodname__") == 0) {
 	if (self->methodname)
-	    val = PyUnicode_FromString(self->methodname);
+	    val = PyString_FromString(self->methodname);
 	else
 	    val = Py_BuildValue(""); /* None */
     }
@@ -1151,7 +1153,7 @@ pysvrv_getattr(PySVRV *self, char *name)
 	if (SvOBJECT(sv)) {
 	    char *klass = HvNAME(SvSTASH(sv));
 	    ENTER_PYTHON;
-	    val = PyUnicode_FromString(klass);
+	    val = PyString_FromString(klass);
 	}
 	else {
 	    ENTER_PYTHON;
@@ -1163,7 +1165,7 @@ pysvrv_getattr(PySVRV *self, char *name)
 	ENTER_PERL;
 	tmp = sv_reftype(SvRV(self->rv), 0);
 	ENTER_PYTHON;
-	val = PyUnicode_FromString(tmp);
+	val = PyString_FromString(tmp);
     }
     else if (strcmp(name, "__value__") == 0) {
 	SV *sv = SvRV(self->rv);
@@ -1240,12 +1242,13 @@ pysvrv_setattr(PySVRV *self, char *name, PyObject *val)
 	status = 0;
     }
     else if (strcmp(name, "__methodname__") == 0) {
-	if (PyUnicode_Check(val)) {
+	if (PyString_Check(val)) {
 	    PERL_LOCK;
 	    Safefree(self->methodname);
-	    New(998, self->methodname, PyUnicode_GET_LENGTH(val)+1, char);
-	    Copy(PyUnicode_AS_UNICODE(val), self->methodname,
-		 PyUnicode_GET_LENGTH(val)+1, char);
+		Py_ssize_t size;
+		char* methodname = PyString_AsUTF8AndSize(val, &size);
+	    New(998, self->methodname, size+1, char);
+	    Copy(methodname, self->methodname, size+1, char);
 	    PERL_UNLOCK;
 	    status = 0;
 	}
@@ -1255,8 +1258,8 @@ pysvrv_setattr(PySVRV *self, char *name, PyObject *val)
 	}
     }
     else if (strcmp(name, "__class__") == 0) {
-	if (PyUnicode_Check(val)) {
-	    char *klass = PyUnicode_AsUTF8(val);
+	if (PyString_Check(val)) {
+	    char *klass = PyString_AsUTF8(val);
 	    ENTER_PERL;
 	    sv_bless(self->rv, gv_stashpv(klass, 1));
 	    ENTER_PYTHON;
@@ -1361,7 +1364,7 @@ pysvrv_repr(PySVRV *self)
     sv_catpvn(tmp_sv, ">", 1);
     ENTER_PYTHON;
 
-    o = PyUnicode_FromStringAndSize(SvPVX(tmp_sv), SvCUR(tmp_sv));
+    o = PyString_FromStringAndSize(SvPVX(tmp_sv), SvCUR(tmp_sv));
     SvREFCNT_dec(tmp_sv);
 
     ASSERT_LOCK_PYTHON;
@@ -1506,11 +1509,11 @@ pysvrv_subscript(PySVRV *self, PyObject *key)
     }
     else if (SvTYPE(sv) == SVt_PVHV) {
 	HV* hv = (HV*)sv;
-	if (PyUnicode_Check(key)) {
+	if (PyString_Check(key)) {
 	    SV** svp;
 	    ENTER_PERL;
         Py_ssize_t size;
-        char* keystr = PyUnicode_AsUTF8AndSize(key, &size);
+        char* keystr = PyString_AsUTF8AndSize(key, &size);
 	    svp = hv_fetch(hv, keystr, size, 0);
 	    if (svp) {
 		SvGETMAGIC(*svp);
@@ -1604,9 +1607,9 @@ pysvrv_ass_sub(PySVRV *self, PyObject *key, PyObject *val)
     }
     else if (SvTYPE(sv) == SVt_PVHV) {
 	HV* hv = (HV*)sv;
-	if (PyUnicode_Check(key)) {
+	if (PyString_Check(key)) {
 	    Py_ssize_t   key_len;
-	    char *key_str = PyUnicode_AsUTF8AndSize(key, &key_len);
+	    char *key_str = PyString_AsUTF8AndSize(key, &key_len);
 	    if (val) {
 		SV* val_sv;
 		SV** svp;

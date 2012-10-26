@@ -4,10 +4,11 @@
  * between perl and python datatypes.
  */
 
+#include <Python.h>
 #include <EXTERN.h>
 #include <perl.h>
-#include <Python.h>
 
+#include "2to3.h"
 #include "lang_map.h"
 #include "lang_lock.h"
 #include "thrd_ctx.h"
@@ -30,9 +31,9 @@ pyo2sv(PyObject *o)
     if (o == Py_None) {
 	return newSV(0);
     }
-    else if (PyUnicode_Check(o)) {
+    else if (PyString_Check(o)) {
 		Py_ssize_t size;
-		char* str = PyUnicode_AsUTF8AndSize(o, &size);
+		char* str = PyString_AsUTF8AndSize(o, &size);
 		return newSVpvn(str, size);
     }
     else if (PyLong_Check(o)) {

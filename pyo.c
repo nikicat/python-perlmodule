@@ -1,6 +1,6 @@
+#include <Python.h>
 #include <EXTERN.h>
 #include <perl.h>
-#include <Python.h>
 
 #include "pyo.h"
 #include "lang_lock.h"

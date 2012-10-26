@@ -3,9 +3,11 @@
  * This is a python extension module that embeds perl.
  */
 
+#include <Python.h>
 #include <EXTERN.h>
 #include <perl.h>
-#include <Python.h>
+
+#include "2to3.h"
 
 #include "thrd_ctx.h"
 #include "perlmodule.h"
@@ -125,8 +127,8 @@ call_perl(char *method, SV* obj, I32 gimme,
         }
         m_obj = PyTuple_GetItem(args, 0);
         m_obj = PyObject_Str(m_obj); /* need decrement refcount after call */
-        assert(PyUnicode_Check(m_obj));
-        method = PyUnicode_AsUTF8(m_obj);
+        assert(PyString_Check(m_obj));
+        method = PyString_AsUTF8(m_obj);
         argfirst = 1;
     }
     else if (!obj && !arglen) {
@@ -187,8 +189,8 @@ call_perl(char *method, SV* obj, I32 gimme,
     char *key_str;
     PyObject *val;
     while (PyDict_Next(keywds, &pos, &key, &val)) {
-        assert(PyUnicode_Check(key));
-        key_str = PyUnicode_AsUTF8(key);
+        assert(PyString_Check(key));
+        key_str = PyString_AsUTF8(key);
       
         if (key_str[0] == '_' && key_str[1] == '_')
         continue;
@@ -742,8 +744,14 @@ struct module_state {
         PyObject *error;
 };
 
+#if PY_MAJOR_VERSION >= 3
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else
+#define GETSTATE(m) (&_state)
+static struct module_state _state;
+#endif
 
+#if PY_MAJOR_VERSION >= 3
 static int perl_traverse(PyObject *m, visitproc visit, void *arg) {
     Py_VISIT(GETSTATE(m)->error);
     return 0;
@@ -766,7 +774,14 @@ static struct PyModuleDef moduledef = {
         NULL
 };
 
+#define INITERROR return NULL
+
 PyObject*
+#else
+#define INITERROR return
+void
+#endif
+
 #ifdef DL_HACK
 initperl2()
 #else
@@ -799,7 +814,13 @@ initperl()
      * python itself was embedded before we imported perl.
      */
 
+#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&moduledef);
+#else
+    m = Py_InitModule("perl", PerlMethods);
+#endif
+    if (m == NULL)
+        INITERROR;
     d = PyModule_GetDict(m);
     PerlError = PyErr_NewException("perl.PerlError", NULL, NULL);
     PyDict_SetItemString(d, "PerlError", PerlError);
@@ -808,5 +829,7 @@ initperl()
 #else
     PyDict_SetItemString(d, "MULTI_PERL", PyLong_FromLong(0));
 #endif
+#if PY_MAJOR_VERSION >= 3
     return m;
+#endif
 }

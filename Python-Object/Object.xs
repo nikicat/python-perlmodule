@@ -1,12 +1,15 @@
 /* Copyright 2000-2001 ActiveState
  */
 
+#include <Python.h>
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
-#include <Python.h>
 #include "PerlPyErr.h"
+
+#include "../2to3.h"
+
 #include "../lang_lock.h"
 #include "../lang_map.h"
 #include "../thrd_ctx.h"
@@ -546,9 +549,9 @@ PyObject_Str(o,...)
      ENTER_PYTHON;
      str_o = (ix == 1) ? PyObject_Str(o) : PyObject_Repr(o);
      PERL_LOCK;
-     if (str_o && PyUnicode_Check(str_o)) {
+     if (str_o && PyString_Check(str_o)) {
          Py_ssize_t size;
-         char* str = PyUnicode_AsUTF8AndSize(str_o, &size);
+         char* str = PyString_AsUTF8AndSize(str_o, &size);
          RETVAL = newSVpvn(str, size);    
      }
      else {
@@ -765,7 +768,7 @@ PyEval_CallObjectWithKeywords(o,...)
                         val_sv = hv_iterval(hv, entry);
 
                         ENTER_PYTHON;
-                        key = PyUnicode_FromStringAndSize(kstr, klen);
+                        key = PyString_FromStringAndSize(kstr, klen);
                         if (key == NULL)
                             goto done;
 
@@ -935,9 +938,9 @@ as_string(self,...)
     str = PyObject_Str(self->type);
         PERL_LOCK;
     RETVAL = newSVpv("", 0);
-        if (str && PyUnicode_Check(str)) {
+        if (str && PyString_Check(str)) {
         sv_catpv(RETVAL, "python.");
-            sv_catpv(RETVAL, PyUnicode_AsUTF8(str));
+            sv_catpv(RETVAL, PyString_AsUTF8(str));
         }
         else
             sv_catpv(RETVAL, "python");
@@ -947,11 +950,11 @@ as_string(self,...)
 
         if (self->value &&
             (str = PyObject_Str(self->value)) &&
-            PyUnicode_Check(str))
+            PyString_Check(str))
         {
         PERL_LOCK;
             sv_catpv(RETVAL, ": ");
-            sv_catpv(RETVAL, PyUnicode_AsUTF8(str));
+            sv_catpv(RETVAL, PyString_AsUTF8(str));
             PERL_UNLOCK;
         }
         Py_XDECREF(str);

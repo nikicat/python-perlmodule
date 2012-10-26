@@ -1,9 +1,9 @@
 /* Copyright 2000-2001 ActiveState
  */
 
+#include <Python.h>
 #include <EXTERN.h>
 #include <perl.h>
-#include <Python.h>
 
 #include "lang_lock.h"
 

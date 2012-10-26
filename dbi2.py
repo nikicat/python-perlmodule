@@ -74,13 +74,13 @@ class connection:
             raise OperationalError(perl.eval("$DBI::errstr"))
 
         self.dbh["RaiseError"] = 1
-        
+
         try:
             self.dbh["AutoCommit"] = 0
             self.autocommit = 0
         except:
             self.autocommit = 1
-            
+
 
     def commit(self):
         self.dbh.commit()
@@ -129,7 +129,7 @@ class cursor:
             return self._description()
         else:
             raise AttributeError(attr)
-        
+
     def _description(self):
         name = tuple(self.sth["NAME"])
         dsize = (0,) * len(name) # DBI does have this info
@@ -236,15 +236,15 @@ TYPES = {
 
 class TYPE:
     def __init__(self,*values):
-	self.values = values
+        self.values = values
 
     def __cmp__(self,other):
-	if other in self.values:
-	    return 0
-	if other < self.values:
-	    return 1
-	else:
-	    return -1
+        if other in self.values:
+            return 0
+        if other < self.values:
+            return 1
+        else:
+            return -1
 
 STRING   = TYPE("CHAR", "VARCHAR", "LONGVARCHAR")
 BINARY   = TYPE("BINARY", "VARBINARY", "LONGVARBINARY")
