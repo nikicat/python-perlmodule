@@ -1135,89 +1135,99 @@ pysvrv_getattr(PySVRV *self, char *name)
     SET_CUR_PERL;
 
     if (strcmp(name, "__wantarray__") == 0) {
-	if (self->gimme == G_VOID)
-	    val = Py_BuildValue(""); /* None */
-	else 
-	    val = PyLong_FromLong((long)(self->gimme == G_ARRAY));
+        if (self->gimme == G_VOID)
+            val = Py_BuildValue(""); /* None */
+        else
+            val = PyLong_FromLong((long)(self->gimme == G_ARRAY));
     }
     else if (strcmp(name, "__methodname__") == 0) {
-	if (self->methodname)
-	    val = PyString_FromString(self->methodname);
-	else
-	    val = Py_BuildValue(""); /* None */
+        if (self->methodname)
+            val = PyString_FromString(self->methodname);
+        else
+            val = Py_BuildValue(""); /* None */
     }
     else if (strcmp(name, "__class__") == 0) {
-	SV *sv;
-	ENTER_PERL;
-	sv =  SvRV(self->rv);
-	if (SvOBJECT(sv)) {
-	    char *klass = HvNAME(SvSTASH(sv));
-	    ENTER_PYTHON;
-	    val = PyString_FromString(klass);
-	}
-	else {
-	    ENTER_PYTHON;
-	    val = Py_BuildValue("");
-	}
+        SV *sv;
+        ENTER_PERL;
+        sv =  SvRV(self->rv);
+        if (SvOBJECT(sv)) {
+            char *klass = HvNAME(SvSTASH(sv));
+            ENTER_PYTHON;
+            val = PyString_FromString(klass);
+        }
+        else {
+            ENTER_PYTHON;
+            val = Py_BuildValue("");
+        }
     }
     else if (strcmp(name, "__type__") == 0) {
-	const char *tmp;
-	ENTER_PERL;
-	tmp = sv_reftype(SvRV(self->rv), 0);
-	ENTER_PYTHON;
-	val = PyString_FromString(tmp);
+        const char *tmp;
+        ENTER_PERL;
+        tmp = sv_reftype(SvRV(self->rv), 0);
+        ENTER_PYTHON;
+        val = PyString_FromString(tmp);
     }
     else if (strcmp(name, "__value__") == 0) {
-	SV *sv = SvRV(self->rv);
-	switch (SvTYPE(sv)) {
-	case SVt_PVAV:
-	case SVt_PVHV:
-	case SVt_PVCV:
-	    PyErr_SetString(PyExc_AttributeError, name);
-	    val = NULL;
-	    break;
-	default:
-	    PERL_LOCK;
-	    val = sv2pyo(sv); 
-	    PERL_UNLOCK;
-	}
+        SV *sv = SvRV(self->rv);
+        switch (SvTYPE(sv)) {
+        case SVt_PVAV:
+        case SVt_PVHV:
+        case SVt_PVCV:
+            PyErr_SetString(PyExc_AttributeError, name);
+            val = NULL;
+            break;
+        default:
+            PERL_LOCK;
+            val = sv2pyo(sv); 
+            PERL_UNLOCK;
+        }
     }
     else if (strcmp(name, "__readonly__") == 0) {
-	val = PyLong_FromLong(SvREADONLY(SvRV(self->rv)) != 0);
+        val = PyLong_FromLong(SvREADONLY(SvRV(self->rv)) != 0);
     }
     else if (self->methodname) {
-	PyErr_SetString(PyExc_AttributeError, name);
-	val = NULL;
+        PyErr_SetString(PyExc_AttributeError, name);
+        val = NULL;
     }
     else if (SvOBJECT(SvRV(self->rv))) {
-	PySVRV *method_obj;
-	int len;
-	PERL_LOCK;
-	method_obj = (PySVRV *)PySVRV_New(self->rv);
-	len = strlen(name);
+        PySVRV *method_obj;
+        int len;
+        PERL_LOCK;
+        method_obj = (PySVRV *)PySVRV_New(self->rv);
+        len = strlen(name);
 
-	New(999, method_obj->methodname, len+1, char);
-	Copy(name, method_obj->methodname, len+1, char);
+        New(999, method_obj->methodname, len+1, char);
+        Copy(name, method_obj->methodname, len+1, char);
 
-	if (len > 6 && strEQ(name+len-6, "_tuple")) {
-	    method_obj->methodname[len-6] = '\0';
-	    method_obj->gimme  = G_ARRAY;
-	}
-	else {
-	    method_obj->gimme  = self->gimme;
-	}
-	PERL_UNLOCK;
-	val = (PyObject *)method_obj;
+        if (len > 6 && strEQ(name+len-6, "_tuple")) {
+            method_obj->methodname[len-6] = '\0';
+            method_obj->gimme  = G_ARRAY;
+        }
+        else {
+            method_obj->gimme  = self->gimme;
+        }
+        PERL_UNLOCK;
+        val = (PyObject *)method_obj;
     }
     else if (SvTYPE(SvRV(self->rv)) == SVt_PVAV) {
-	val = PyObject_GetAttrString((PyObject *)self, name);
+        PyMethodDef* method;
+        for (method=list_methods; method->ml_name; method++) {
+            if (strcmp(method->ml_name, name) == 0) {
+                val = PyCFunction_New(((PyMethodDescrObject*)PyDescr_NewMethod(&SVRVtype, method))->d_method, (PyObject*)self);
+            }
+        }
     }
     else if (SvTYPE(SvRV(self->rv)) == SVt_PVHV) {
-	val = PyObject_GetAttrString((PyObject *)self, name);
+        PyMethodDef* method;
+       for (method = mapp_methods; method->ml_name; method++) {
+            if (strcmp(method->ml_name, name) == 0) {
+                val = PyCFunction_New(((PyMethodDescrObject*)PyDescr_NewMethod(&SVRVtype, method))->d_method, (PyObject*)self);
+            }
+        }
     }
     else {
-	PyErr_SetString(PyExc_AttributeError, name);
-	val = NULL;
+        PyErr_SetString(PyExc_AttributeError, name);
+        val = NULL;
     }
 
     ASSERT_LOCK_PYTHON;
