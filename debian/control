@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Nikolay Bryskin <devel.niks@gmail.com>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.3
-X-Python3-Version: >= 3.2
+X-Python3-Version: >= 3.3
 Homepage: https://github.com/nikicat/python-perlmodule
 Vcs-Git: git+ssh://git@github.com:nikicat/python-perlmodule.git
 Vcs-Browser: https://github.com/nikicat/python-perlmodule
@@ -31,7 +31,7 @@ Description: pyperl - Perl for Python2
 
 Package: python3-perlmodule
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}, ${python3:Depends}, python-support (>= 0.90), libpython-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}, python3.3, python-support (>= 0.90), libpython-perl
 Description: pyperl - Perl for Python3
  This is a Python extension module that makes it possible to embed Perl
  interpreter(s) in any Python program.  It can be used to invoke
