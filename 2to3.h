@@ -24,6 +24,10 @@ static char* PyString_AsUTF8(PyObject *string) {
 
 #if PY_MAJOR_VERSION >= 3
 #define PyString_Check PyUnicode_Check
-#define PyString_FromString PyUnicode_FromString
-#define PyString_FromStringAndSize PyUnicode_FromStringAndSize
+static PyObject* PyString_FromStringAndSize(const char* s, Py_ssize_t size) {
+    return PyUnicode_DecodeUTF8(s, size, 'ignore');
+}
+static PyObject* PyString_FromString(const char* s) {
+    return PyString_FromStringAndSize(s, (Py_ssize_t)strlen(s));
+}
 #endif
