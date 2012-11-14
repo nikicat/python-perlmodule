@@ -21,7 +21,7 @@ Description: Python perl module (needed for pyperl)
 
 Package: python-perlmodule
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-support (>= 0.90), libpython-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-support (>= 0.90), libpython-perl (= ${binary:Version})
 Description: pyperl - Perl for Python2
  This is a Python extension module that makes it possible to embed Perl
  interpreter(s) in any Python program.  It can be used to invoke
@@ -31,7 +31,7 @@ Description: pyperl - Perl for Python2
 
 Package: python3-perlmodule
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}, python3.3, python-support (>= 0.90), libpython-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}, python3.3, python-support (>= 0.90), libpython-perl (= ${binary:Version})
 Description: pyperl - Perl for Python3
  This is a Python extension module that makes it possible to embed Perl
  interpreter(s) in any Python program.  It can be used to invoke
