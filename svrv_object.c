@@ -115,7 +115,7 @@ pysvrv_dealloc(PySVRV *self)
 
 
 static PyObject*
-pysvrv_has_key(PySVRV *self, PyObject *args)
+pysvrv_contains(PySVRV *self, PyObject *args)
 {
     char *key;
     int keylen;
@@ -124,7 +124,7 @@ pysvrv_has_key(PySVRV *self, PyObject *args)
 
     ASSERT_LOCK_PYTHON;
     CHECK_OWNED_PY;
-    if (!PyArg_ParseTuple(args, "s#:has_key", &key, &keylen))
+    if (!PyArg_ParseTuple(args, "s#:__contains__", &key, &keylen))
 	return NULL;
 
     ENTER_PERL;
@@ -1098,7 +1098,7 @@ pysvrv_av_alloc(PySVRV *self, PyObject *args)
 
 
 static PyMethodDef mapp_methods[] = {
-    {"has_key",	(PyCFunction)pysvrv_has_key, METH_VARARGS},
+    {"__contains__",	(PyCFunction)pysvrv_contains, METH_VARARGS},
     {"keys",	(PyCFunction)pysvrv_keys,    METH_NOARGS},
     {"items",	(PyCFunction)pysvrv_items,   METH_NOARGS},
     {"values",	(PyCFunction)pysvrv_values,  METH_NOARGS},
