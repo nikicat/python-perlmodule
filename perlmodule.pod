@@ -317,7 +317,7 @@ exception is raised if non-string keys are used.
 
 =over
 
-=item hash.has_key(key)
+=item key in hash
 
 Check if the hash has the key.  Same as perl's exists $hash{$key}.
 

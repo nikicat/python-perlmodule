@@ -223,7 +223,7 @@ sub FETCH {
 }
 
 sub EXISTS {
-    $_[0][0]->has_key($_[1]);
+    $_[0][0]->__contains__($_[1]);
 }
 
 sub STORE {
