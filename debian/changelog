@@ -1,3 +1,16 @@
+python-perlmodule (1.0.1d~precise3) precise; urgency=low
+
+  * Rebuilded with MULTI_PERL
+
+ -- Nikolay Bryskin <nbryskin@yandex-team.ru>  Wed, 14 Nov 2012 04:43:26 +0400
+
+python-perlmodule (1.0.1d~precise2) precise; urgency=low
+
+  * Fix: has_key replaced with __contains__
+  * Versioned inter-package dependecies
+
+ -- Nikolay Bryskin <nbryskin@yandex-team.ru>  Tue, 13 Nov 2012 23:15:17 +0400
+
 python-perlmodule (1.0.1d~precise1) precise; urgency=low
 
   * Initial Release.
