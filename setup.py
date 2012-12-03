@@ -155,9 +155,6 @@ class my_install(install):
 
     def run(self):
         cur_dir = os.getcwd()
-        multi_perl = os.path.join(cur_dir, 'MULTI_PERL')
-        if os.access(multi_perl, os.F_OK):
-            os.unlink(multi_perl)
         if self.root is None:
             self.root = ''
 
