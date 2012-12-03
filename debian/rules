@@ -24,7 +24,6 @@ PYTHON3=$(shell py3versions -vr)
 	dh $@ --with python2,python3
 
 build-python%:
-	touch MULTI_PERL
 	python$* setup.py build
 
 override_dh_auto_build: $(PYTHON3:%=build-python%)
@@ -40,3 +39,6 @@ override_dh_auto_clean:
 	dh_auto_clean
 	rm -rf build
 	rm -rf *.egg-info
+
+override_dh_strip:
+	true
