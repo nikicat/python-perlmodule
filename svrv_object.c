@@ -1213,15 +1213,15 @@ pysvrv_getattr(PySVRV *self, char *name)
         PyMethodDef* method;
         for (method=list_methods; method->ml_name; method++) {
             if (strcmp(method->ml_name, name) == 0) {
-                val = PyCFunction_New(((PyMethodDescrObject*)PyDescr_NewMethod(&SVRVtype, method))->d_method, (PyObject*)self);
+                val = PyCFunction_New(method, (PyObject*)self);
             }
         }
     }
     else if (SvTYPE(SvRV(self->rv)) == SVt_PVHV) {
         PyMethodDef* method;
-       for (method = mapp_methods; method->ml_name; method++) {
+        for (method = mapp_methods; method->ml_name; method++) {
             if (strcmp(method->ml_name, name) == 0) {
-                val = PyCFunction_New(((PyMethodDescrObject*)PyDescr_NewMethod(&SVRVtype, method))->d_method, (PyObject*)self);
+                val = PyCFunction_New(method, (PyObject*)self);
             }
         }
     }
