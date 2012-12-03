@@ -1,3 +1,10 @@
+python-perlmodule (1.0.1d~precise5) precise; urgency=low
+
+  * fixed object leak in getattr
+  * debian source format changed to 3.0 (git)
+
+ -- Nikolay Bryskin <nbryskin@yandex-team.ru>  Mon, 03 Dec 2012 21:40:46 +0400
+
 python-perlmodule (1.0.1d~precise4) precise; urgency=low
 
   * Rebuilded with WITH_THREAD
