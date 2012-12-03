@@ -1,3 +1,9 @@
+python-perlmodule (1.0.1d~precise4) precise; urgency=low
+
+  * Rebuilded with WITH_THREAD
+
+ -- Nikolay Bryskin <nbryskin@yandex-team.ru>  Thu, 15 Nov 2012 20:24:58 +0400
+
 python-perlmodule (1.0.1d~precise3) precise; urgency=low
 
   * Rebuilded with MULTI_PERL
